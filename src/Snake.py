@@ -16,10 +16,10 @@ _corners = {
 
 
 class Snake:
-    def __init__(self):
-        head = (curses.LINES // 2, curses.COLS // 2)
+    def __init__(self, y, x, h, w):
+        head = (y + (y + h) // 2, x + (x + w) // 2)
         self.body = [head]
-        tmp = [tuple(map(sum, zip(head, (0, i)))) for i in range(1, 20)]
+        tmp = [tuple(map(sum, zip(head, (0, i)))) for i in range(1, 2)]
         self.body += tmp
         self.tokens = ['@'] + ['-'] * len(tmp)
 
@@ -28,6 +28,8 @@ class Snake:
 
         self.trail = []
         self.score = 0
+
+        self.scene = y, x, h, w
 
     def change_direction(self, dir):
         if (dir in [curses.KEY_UP, curses.KEY_DOWN, curses.KEY_LEFT, curses.KEY_RIGHT]
@@ -79,23 +81,23 @@ class Snake:
         eating_apple = self.body[0] == apple.pos
         if eating_apple:
             self.score += 1
-            apple.spawn()
+            apple.spawn(*self.scene)
         return eating_apple
 
     def head(self):
         return self.body[0]
 
-    def inside(self):
-        return (0 <= self.body[0][0] < curses.LINES) and (0 <= self.body[0][1] < curses.COLS)
+    def inside(self, y, x, h, w):
+        return (y < self.body[0][0] < y + h - 1) and (x < self.body[0][1] < x + w - 1)
 
     def self_intersect(self):
         return sum([self.head() == part for part in self.body[1:]])
 
-    def update(self, eating_apple):
+    def update(self, eating_apple, ):
         if eating_apple:
             self.trail += [self.body[-1]] * 10
 
-        if not self.inside():
+        if not self.inside(*self.scene):
             return 1
             # raise Warning(f"hit walls -> {self.score}")
 
@@ -109,7 +111,7 @@ class Snake:
         for i, part in enumerate(self.body[1:]):
             stdscr.addch(*part, self.tokens[i + 1])
 
-        if self.inside():
+        if self.inside(*self.scene):
             stdscr.addstr(*self.body[0], '@')
 
         msgs = [f"trail: {self.trail}",
