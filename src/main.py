@@ -1,30 +1,41 @@
 import curses
 import time
 
-from Apple import Apple
-from Snake import Snake
+import sys
+
+sys.path.append("./")
+from src.Apple import Apple
+from src.Snake import Snake
+from src.utils import log
 
 
 def main(stdscr):
-    if not curses.can_change_color():
-        raise Warning("Cannot change terminal colors...")
+    fps = 15
+    scene = 0, 0, 30, 30
+    nb_apples = 10
+    init_length = 10
+
+    log(type(stdscr))
+    if curses.can_change_color():
+        _wall = 10
+        curses.init_color(_wall, 1000, 1000, 1000)
+        curses.init_pair(_wall, _wall, _wall)
+    else:
+        _wall = 1
+        curses.init_pair(_wall, curses.COLOR_WHITE, curses.COLOR_WHITE)
+
     curses.curs_set(0)
     stdscr.nodelay(1)
 
-    scene = 0, 0, curses.LINES - 1, curses.COLS - 1
-    snake = Snake(*scene)
-    apple = Apple(*scene)
+    snake = Snake()
+    apples = [Apple() for _ in range(nb_apples)]
+    snake.spawn(*scene, init_length=init_length)
+    for apple in apples:
+        apple.spawn(*scene)
 
-    fps = 15
-
-    H = 20
-    W = 20
-
-    _wall = 10
-    curses.init_color(_wall, 1000, 1000, 1000)
-    curses.init_pair(_wall, _wall, _wall)
-
-    play = True
+    game_state = "play"
+    debug_msg = ''
+    score = 0
     while True:
         stdscr.erase()
 
@@ -43,22 +54,44 @@ def main(stdscr):
             break
 
         if c == ord('r'):
-            if not play:
-                snake = Snake(*scene)
-                apple = Apple(*scene)
-                play = True
+            if game_state != "play":
+                snake.spawn(*scene)
+                for apple in apples:
+                    apple.spawn(*scene)
+                score = 0
+                game_state = "play"
 
         if c == 10:
-            curses.resizeterm(curses.LINES + 5, curses.COLS)
+            game_state = "menu" if game_state == "play" else "play"
 
-        snake.change_direction(c)
-        if play:
+        if game_state == "play":
+            snake.change_direction(c)
             snake.move()
-            if snake.update(snake.is_eating(apple)):
-                play = False
+            code = snake.update(snake.is_eating(apples))
+            if code < Snake.NOTHING:
+                curses.beep()
+                game_state = "lost"
+                if code == Snake.OUTSIDE:
+                    debug_msg = f"hit walls -> {score}"
+                elif code == Snake.SELF_BITE:
+                    debug_msg = f"self_intersect -> {score}"
+            else:
+                score += code
 
         snake.show(stdscr)
-        apple.show(stdscr)
+        for apple in apples:
+            apple.show(stdscr)
+
+        msgs = [
+            f"{snake.trail = }",
+            f"{len(snake.body) = }",
+            f"{score = }",
+            f"{game_state = }",
+            f"{debug_msg = }"
+        ]
+        h = 0 if snake.get_head()[0] > curses.LINES // 2 else curses.LINES - 1 - len(msgs)
+        for row, msg in zip(range(len(msgs)), list(map(str, msgs))):
+            stdscr.addstr(h + row, 0, msg)
 
         stdscr.refresh()
         time.sleep(1 / fps)
