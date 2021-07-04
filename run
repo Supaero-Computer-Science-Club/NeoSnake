@@ -1,0 +1,1 @@
+gsettings set org.gnome.desktop.interface monospace-font-name 'square 13' && python src/main.py && gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
