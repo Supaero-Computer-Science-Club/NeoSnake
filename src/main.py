@@ -5,9 +5,16 @@ import sys
 sys.path.append("./")
 from src.Apple import Apple
 from src.Snake import Snake
-from src.errors import error_handler, CustomError
 
-from src.game import _wall, init_borders, handle_input, play, menu, blit
+from src.errors import error_handler
+from src.errors import CustomError
+
+from src.game import _wall
+from src.game import init_borders
+from src.game import handle_input
+from src.game import menu
+from src.game import play
+from src.game import blit
 
 
 @error_handler
