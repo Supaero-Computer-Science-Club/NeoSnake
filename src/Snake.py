@@ -32,7 +32,7 @@ class Snake:
         self.dir, self.neck_asset = None, None
 
         # a list containing parts to add to the snake, allows better animation.
-        self.trail = []
+        self.trail = None
 
         # the swiftness of the snake, inversely proportional to the rate at which the snake moves.
         # the number of life steps that the snake experienced.
@@ -78,6 +78,9 @@ class Snake:
 
         # the assets are simply the head plus the right amount of body parts.
         self.assets = ['@'] + ['|' if self.dir in [curses.KEY_UP, curses.KEY_DOWN] else '-'] * len(tmp)
+
+        # reset the trail of the snake.
+        self.trail = []
 
         # reset the number of life steps.
         self.life_step = 0
