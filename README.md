@@ -1,12 +1,17 @@
-# snake
+# Neo-snake
 
-gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
-gsettings set org.gnome.desktop.interface monospace-font-name 'square 13'
-gsettings set org.gnome.desktop.interface monospace-font-name 'square 13' && python src/main.py && gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
+## 1. Installation
+### a. The game font.
+**Neo-snake** uses a special font that allows the terminal to display squares characters.
 
+One can download the *square* font [here](https://strlen.com/square/).
 
-Dowload font [here](https://strlen.com/square/).
+Once the .ttf file in dowloaded, simply move it inside one of the system fonts directory.
 
-Put it inside `/usr/share/fonts`, `/usr/local/share/fonts` or `~/.fonts`. The latter does not require `sudo`.
+On Ubuntu 20.04 LTS, such directories are under `/usr/share/fonts`, `/usr/local/share/fonts` or `~/.fonts`. The latter does not require `sudo` rights as it is only local.
 
-Run the code with `./run`
+### b. Python modules
+No particular dependencies (?).
+
+## 2. Run the code.
+Run the code by running the `./run` command in the shell.

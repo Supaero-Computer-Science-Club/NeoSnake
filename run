@@ -1,4 +1,11 @@
 #! /usr/bin/bash
-gsettings set org.gnome.desktop.interface monospace-font-name 'square 13'
-python src/main.py
-gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 13'
+terminal_font=$(gsettings get org.gnome.desktop.interface monospace-font-name)
+game_font='square 13'
+
+if [[ $(fc-list | grep -c square) == 0 ]];
+  then  echo "square.ttf not found.";
+        echo "please install the square font (available at https://strlen.com/square/) inside /usr/share/fonts, /usr/local/share/fonts or ~/.fonts";
+  else  gsettings set org.gnome.desktop.interface monospace-font-name "$game_font";
+        python src/main.py;
+        gsettings set org.gnome.desktop.interface monospace-font-name "$terminal_font";
+fi
