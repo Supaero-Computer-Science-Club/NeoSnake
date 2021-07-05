@@ -1,3 +1,8 @@
+import curses
+
+from src.utils import log
+
+
 class CustomError(Exception):
     pass
 
@@ -18,14 +23,36 @@ class CustomError(Exception):
 #     def __str__(self):
 #         return f'{self.salary} -> {self.message}'
 
-def error_handler(func):
+def curses_wrapper(func):
+    def wrapper(*args, **kwargs):
+        log("init")
+        stdscr = curses.initscr()
+        curses.noecho()
+        curses.cbreak()
+        stdscr.keypad(True)
+        curses.start_color()
+        try:
+            log("main")
+            func(stdscr=stdscr, *args, **kwargs)
+        finally:
+            log("quit")
+            curses.nocbreak()
+            stdscr.keypad(False)
+            curses.echo()
+            curses.endwin()
+
+    return wrapper
+
+
+def error_handler_wrapper(func):
     def wrapper(*args, **kwargs):
         try:
-            res = func(*args, **kwargs)
-            return res
+            return func(*args, **kwargs)
         except CustomError as ce:
+            log("CustomError")
             print(ce)
         except KeyboardInterrupt:
+            log("KeyboardInterrupt")
             pass
 
     return wrapper

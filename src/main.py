@@ -6,8 +6,9 @@ sys.path.append("./")
 from src.Apple import Apple
 from src.Snake import Snake
 
-from src.errors import error_handler
 from src.errors import CustomError
+from src.errors import curses_wrapper
+from src.errors import error_handler_wrapper
 
 from src.game import _wall
 from src.game import PLAY
@@ -19,7 +20,8 @@ from src.game import play
 from src.game import blit
 
 
-@error_handler
+@error_handler_wrapper
+@curses_wrapper
 def main(stdscr):
     # global game parameters.
     fps = 15
@@ -30,8 +32,11 @@ def main(stdscr):
 
     # check if everything can work properly.
     if (curses.LINES < sh + 2) or (curses.COLS < sw + 2):
+        d_lines, d_cols = max(0, sh + 2 - curses.LINES), max(0, sw + 2 - curses.COLS)
         msg = f"terminal too small.\n" \
-              f"expected at least {sw + 2, sh + 2} for a {sw, sh} game board, got {curses.COLS, curses.LINES}"
+              f"expected at least {sw + 2, sh + 2} for a {sw, sh} game board, got {curses.COLS, curses.LINES}\n" \
+              f"please increase terminal's width by {d_cols} pixel{'s' if d_cols > 1 else ''} and " \
+              f"its height by {d_lines} pixel{'s' if d_lines > 1 else ''}"
         raise CustomError(msg)
 
     if curses.can_change_color():
@@ -83,4 +88,4 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    main()
