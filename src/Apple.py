@@ -7,6 +7,7 @@ class Apple:
     """
         The apple in the Snake game.
     """
+
     def __init__(self, asset='o'):
         """
             Creates a new empty apple.
