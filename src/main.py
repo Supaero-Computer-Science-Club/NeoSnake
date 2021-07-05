@@ -74,12 +74,9 @@ def main(stdscr):
             menu()
         elif game_state == PLAY:
             new_score, new_game_state, new_debug_msg = play(c, snake, apples, game_score)
-            if new_score:
-                game_score = new_score
-            if new_game_state:
-                game_state = new_game_state
-            if new_debug_msg:
-                game_debug_msg = new_debug_msg
+            game_score = new_score if new_score else game_score
+            game_state = new_game_state if new_game_state else game_state
+            game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
 
         # blit all the objects on the screen.
         blit(stdscr, borders, snake, apples, game_score, game_state, game_debug_msg, fps)
