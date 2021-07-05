@@ -1,7 +1,5 @@
 import numpy as np
 
-from src.utils import log
-
 
 class Apple:
     """
@@ -26,17 +24,20 @@ class Apple:
 
             Args
             ----
-            y : int
+            y : 0 <= int < curses.LINES
                 the y coordinate of the top left corner of the game area.
-            x : int
+            x : 0 <= int < curses.COLS
                 the x coordinate of the top left corner of the game area.
-            h : int
+            h : 0 <= int < curses.LINES - y
                 the height of the game area.
-            w : int
+            w : 0 <= int < curses.COLS - x
                 the width of the game area.
+
+            Returns
+            -------
+            None
         """
         self.pos = (np.random.randint(y, y + h), np.random.randint(x, x + w))
-        log(self.pos)
 
     def show(self, stdscr):
         """

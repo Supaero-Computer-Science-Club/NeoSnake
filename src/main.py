@@ -10,6 +10,8 @@ from src.errors import error_handler
 from src.errors import CustomError
 
 from src.game import _wall
+from src.game import PLAY
+from src.game import MENU
 from src.game import init_borders
 from src.game import handle_input
 from src.game import menu
@@ -53,7 +55,7 @@ def main(stdscr):
         apple.spawn(*scene)
 
     # internal variables of the game.
-    game_state = "play"
+    game_state = PLAY
     game_debug_msg = ''
     game_score = 0
 
@@ -68,9 +70,9 @@ def main(stdscr):
         game_score *= reset
 
         # run the current game state code snippet.
-        if game_state == "menu":
+        if game_state == MENU:
             menu()
-        elif game_state == "play":
+        elif game_state == PLAY:
             new_score, new_game_state, new_debug_msg = play(c, snake, apples, game_score)
             if new_score:
                 game_score = new_score

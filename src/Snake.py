@@ -45,17 +45,20 @@ class Snake:
 
             Args
             ----
-            y : int >= 0
+            y : 0 <= int < curses.LINES
                 the y coordinate of the top left corner of the game area.
-            x : int >= 0
+            x : 0 <= int < curses.COLS
                 the x coordinate of the top left corner of the game area.
-            h : int >= 0
+            h : 0 <= int < curses.LINES - y
                 the height of the game area.
-            w : int >= 0
+            w : 0 <= int < curses.COLS - x
                 the width of the game area.
             init_length : int >= 0, optional
                 the initial length of the snake.
 
+            Returns
+            -------
+            None
         """
         # cache the scene.
         self.scene = y, x, h, w
