@@ -1,104 +1,80 @@
 import curses
-import time
 
 import sys
 
 sys.path.append("./")
 from src.Apple import Apple
 from src.Snake import Snake
-from src.utils import log
+from src.errors import error_handler, CustomError
+
+from src.game import _wall, init_borders, handle_input, play, menu, blit
 
 
+@error_handler
 def main(stdscr):
+    # global game parameters.
     fps = 15
-    scene = 0, 0, 30, 30
-    nb_apples = 10
-    init_length = 10
+    scene = sx, sy, sh, sw = 1, 1, 34, 34
+    nb_apples = 2
+    init_length = 2
+    swiftness = 1
 
-    log(type(stdscr))
+    # check if everything can work properly.
+    if (curses.LINES < sh + 2) or (curses.COLS < sw + 2):
+        msg = f"terminal too small.\n" \
+              f"expected at least {sw + 2, sh + 2} for a {sw, sh} game board, got {curses.COLS, curses.LINES}"
+        raise CustomError(msg)
+
     if curses.can_change_color():
-        _wall = 10
         curses.init_color(_wall, 1000, 1000, 1000)
         curses.init_pair(_wall, _wall, _wall)
     else:
-        _wall = 1
         curses.init_pair(_wall, curses.COLOR_WHITE, curses.COLOR_WHITE)
 
     curses.curs_set(0)
     stdscr.nodelay(1)
 
-    snake = Snake()
+    # all the objects in the scene.
+    top_border, bottom_border, left_border, right_border = init_borders(*scene)
+    borders = top_border + bottom_border + left_border + right_border
+    snake = Snake(swiftness=swiftness)
     apples = [Apple() for _ in range(nb_apples)]
+
+    # spawn the spawnable objects.
     snake.spawn(*scene, init_length=init_length)
     for apple in apples:
         apple.spawn(*scene)
 
+    # internal variables of the game.
     game_state = "play"
-    debug_msg = ''
-    score = 0
+    game_debug_msg = ''
+    game_score = 0
+
+    # the game loop.
     while True:
-        stdscr.erase()
-
-        for y, x in [(scene[0], scene[1] + x) for x in range(scene[3])] + \
-                    [(scene[0] + scene[2] - 1, scene[1] + x) for x in range(scene[3])] + \
-                    [(scene[0] + y, scene[1]) for y in range(1, scene[2])] + \
-                    [(scene[0] + y, scene[1] + scene[3] - 1) for y in range(1, scene[2])]:
-            stdscr.addch(y, x, ' ', curses.color_pair(_wall))
-
-        if curses.is_term_resized(curses.LINES, curses.COLS):
-            pass
-
         c = stdscr.getch()
 
-        if c in [27, ord('q')]:
+        # handle the game input.
+        quit_game, reset, game_state = handle_input(c, game_state, scene, snake, apples)
+        if quit_game:
             break
+        game_score *= reset
 
-        if c == ord('r'):
-            if game_state != "play":
-                snake.spawn(*scene)
-                for apple in apples:
-                    apple.spawn(*scene)
-                score = 0
-                game_state = "play"
+        # run the current game state code snippet.
+        if game_state == "menu":
+            menu()
+        elif game_state == "play":
+            new_score, new_game_state, new_debug_msg = play(c, snake, apples, game_score)
+            if new_score:
+                game_score = new_score
+            if new_game_state:
+                game_state = new_game_state
+            if new_debug_msg:
+                game_debug_msg = new_debug_msg
 
-        if c == 10:
-            game_state = "menu" if game_state == "play" else "play"
-
-        if game_state == "play":
-            snake.change_direction(c)
-            snake.move()
-            code = snake.update(snake.is_eating(apples))
-            if code < Snake.NOTHING:
-                curses.beep()
-                game_state = "lost"
-                if code == Snake.OUTSIDE:
-                    debug_msg = f"hit walls -> {score}"
-                elif code == Snake.SELF_BITE:
-                    debug_msg = f"self_intersect -> {score}"
-            else:
-                score += code
-
-        snake.show(stdscr)
-        for apple in apples:
-            apple.show(stdscr)
-
-        msgs = [
-            f"{snake.trail = }",
-            f"{len(snake.body) = }",
-            f"{score = }",
-            f"{game_state = }",
-            f"{debug_msg = }"
-        ]
-        h = 0 if snake.get_head()[0] > curses.LINES // 2 else curses.LINES - 1 - len(msgs)
-        for row, msg in zip(range(len(msgs)), list(map(str, msgs))):
-            stdscr.addstr(h + row, 0, msg)
-
-        stdscr.refresh()
-        time.sleep(1 / fps)
+        # blit all the objects on the screen.
+        blit(stdscr, borders, snake, apples, game_score, game_state, game_debug_msg, fps)
 
 
 if __name__ == "__main__":
-    try:
-        curses.wrapper(main)
-    except KeyboardInterrupt:
-        pass
+    curses.wrapper(main)
