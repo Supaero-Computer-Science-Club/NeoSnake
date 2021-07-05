@@ -23,7 +23,7 @@ class Snake:
     SELF_BITE = -1
     OUTSIDE = -2
 
-    def __init__(self):
+    def __init__(self, swiftness):
         # the body and the assets (resp. the positions of the parts and the assets used for rendering)
         self.body, self.assets = None, None
         # a cache of the scene used in the game.
@@ -33,6 +33,11 @@ class Snake:
 
         # a list containing parts to add to the snake, allows better animation.
         self.trail = []
+
+        # the swiftness of the snake, inversely proportional to the rate at which the snake moves.
+        # the number of life steps that the snake experienced.
+        self.swiftness = swiftness
+        self.life_step = None
 
     def spawn(self, y, x, h, w, init_length=3):
         """
@@ -73,6 +78,9 @@ class Snake:
 
         # the assets are simply the head plus the right amount of body parts.
         self.assets = ['@'] + ['|' if self.dir in [curses.KEY_UP, curses.KEY_DOWN] else '-'] * len(tmp)
+
+        # reset the number of life steps.
+        self.life_step = 0
 
     def change_direction(self, new_dir):
         """
@@ -143,14 +151,16 @@ class Snake:
             -------
             None
         """
-        # pop the head.
-        self.body.pop()
-        self.assets.pop()
+        self.life_step += 1
+        if self.life_step % self.swiftness == 0:
+            # pop the head.
+            self.body.pop()
+            self.assets.pop()
 
-        # compute and insert the new head and the neck asset.
-        new_head = self.body[0][0] + _directions[self.dir][0], self.body[0][1] + _directions[self.dir][1]
-        self.body.insert(0, new_head)
-        self.assets.insert(1, self.neck_asset)
+            # compute and insert the new head and the neck asset.
+            new_head = self.body[0][0] + _directions[self.dir][0], self.body[0][1] + _directions[self.dir][1]
+            self.body.insert(0, new_head)
+            self.assets.insert(1, self.neck_asset)
 
         # complete the snake with its trail.
         if self.trail:
@@ -186,7 +196,7 @@ class Snake:
 
     def inside(self, y, x, h, w):
         """ Checks whether the head of the snake is strictly inside the scene. """
-        return (y < self.body[0][0] < y + h - 1) and (x < self.body[0][1] < x + w - 1)
+        return (y <= self.body[0][0] < y + h) and (x <= self.body[0][1] < x + w)
 
     def self_intersect(self):
         """ Returns a boolean telling if the snake bit its own tail. """

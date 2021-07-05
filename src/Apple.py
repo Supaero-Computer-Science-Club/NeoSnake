@@ -34,7 +34,7 @@ class Apple:
             w : int
                 the width of the game area.
         """
-        self.pos = (np.random.randint(y+1, y + h - 1), np.random.randint(x+1, x + w - 1))
+        self.pos = (np.random.randint(y, y + h), np.random.randint(x, x + w))
         log(self.pos)
 
     def show(self, stdscr):
