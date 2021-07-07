@@ -56,16 +56,15 @@ def handle_input(c, game_state, scene, snake, apples):
 
         Returns
         -------
-        quit, reset, new_game_state : bool, int, int
-            a signal telling if the game is over, a reset integer for the score and the new state of the game.
+        quit, reset, new_game_state, swicth_debug : bool, int, int, bool
+            a signal telling if the game is over, a reset integer for the score, the new state of the game and a debug switching signal.
     """
     # quit the game.
     if c in [27, ord('q')]:
-        return True, None, None
+        return True, None, None, False
 
     # respawn the objects if 'r' is pressed whilst not playing
-    reset = 0
-    new_game_state = game_state
+    reset, new_game_state, switch_debug = 0, game_state, False
     if c == ord('r'):
         if game_state == LOST:
             snake.spawn(*scene)
@@ -78,7 +77,11 @@ def handle_input(c, game_state, scene, snake, apples):
     if c == 10:
         new_game_state = MENU if game_state == PLAY else PLAY
 
-    return False, 1 - reset, new_game_state
+    # switches the debug pannel.
+    if c == ord('d'):
+        switch_debug = True
+
+    return False, 1 - reset, new_game_state, switch_debug
 
 
 def menu():
@@ -134,7 +137,7 @@ def play(c, snake, apples, score):
         return score + code, None, None
 
 
-def blit(stdscr, borders, snake, apples, score, game_state, debug_msg, fps):
+def blit(stdscr, borders, snake, apples, score, game_state, debug, debug_msg, fps):
     """
         Blits all the objects of the game onto the screen.
 
@@ -152,6 +155,8 @@ def blit(stdscr, borders, snake, apples, score, game_state, debug_msg, fps):
             the current score in the game.
         game_state : int
             the current state of the game.
+        debug : bool
+            triggers the printing of the debug message.
         debug_msg : str
             the current debug message.
         fps ; int
@@ -179,8 +184,9 @@ def blit(stdscr, borders, snake, apples, score, game_state, debug_msg, fps):
         # f"{len(snake.body) = }",
         f"{score = }",
         f"{game_state = }",
-        f"{debug_msg = }"
     ]
+    if debug:
+        msgs += [f"{debug_msg = }"]
     h = 0 if snake.get_head()[0] > curses.LINES // 2 else curses.LINES - len(msgs)
     for row, msg in zip(range(len(msgs)), list(map(str, msgs))):
         stdscr.addstr(h + row, 0, msg)

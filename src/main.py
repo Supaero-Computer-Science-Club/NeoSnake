@@ -64,6 +64,7 @@ def main(stdscr):
 
     # internal variables of the game.
     game_state = PLAY
+    game_debug = False
     game_debug_msg = ''
     game_score = 0
 
@@ -72,9 +73,10 @@ def main(stdscr):
         c = stdscr.getch()
 
         # handle the game input.
-        quit_game, reset, game_state = handle_input(c, game_state, scene, snake, apples)
+        quit_game, reset, game_state, switch_debug = handle_input(c, game_state, scene, snake, apples)
         if quit_game:
             break
+        game_debug ^= switch_debug
         game_score *= reset
 
         # run the current game state code snippet.
@@ -87,7 +89,7 @@ def main(stdscr):
             game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
 
         # blit all the objects on the screen.
-        blit(stdscr, borders, snake, apples, game_score, game_state, game_debug_msg, fps)
+        blit(stdscr, borders, snake, apples, game_score, game_state, game_debug, game_debug_msg, fps)
 
 
 if __name__ == "__main__":
