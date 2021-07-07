@@ -1,8 +1,11 @@
 import curses
 
+import os
 import sys
 
-sys.path.append("./")
+# allows the user to play from anywhere in the system.
+path = os.path.dirname(os.path.realpath(__file__)) + "/.."
+sys.path.append(path)
 from src.Apple import Apple
 from src.Snake import Snake
 
