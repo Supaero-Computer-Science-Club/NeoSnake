@@ -4,8 +4,9 @@ import os
 import sys
 
 # allows the user to play from anywhere in the system.
-path = os.path.dirname(os.path.realpath(__file__)) + "/.."
-sys.path.append(path)
+_root = os.path.dirname(os.path.realpath(__file__)) + "/.."
+sys.path.append(_root)
+
 from src.Apple import Apple
 from src.Snake import Snake
 

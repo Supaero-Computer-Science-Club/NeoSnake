@@ -4,7 +4,7 @@ terminal_font=$(gsettings get org.gnome.desktop.interface monospace-font-name)
 game_font='square 13'
 dir_path=$(dirname "$0")
 log_dir="$dir_path"/.log
-recovery_file="$log_dir"/log.recovery
+recovery_file="$log_dir"/recovery
 
 msg="- your previous terminal font was $terminal_font
 - to recover previous font, in case of any crash from the game, please run

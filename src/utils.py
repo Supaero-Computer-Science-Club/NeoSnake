@@ -1,11 +1,19 @@
 import curses
+import os
 
 import numpy as np
+
+# directories initializations.
+_root = os.path.dirname(os.path.realpath(__file__)) + "/.."
+_log = os.path.join(_root, ".log")
+if not os.path.exists(_log):
+    os.makedirs(_log)
+_log = os.path.join(_log, "log")
 
 
 def log(*args, sep=' ', end='\n'):
     """
-        Logs a list of elements inside the 'log.log' file.
+        Logs a list of elements inside the './.log/log' file.
 
         Args
         ----
@@ -20,7 +28,7 @@ def log(*args, sep=' ', end='\n'):
         -------
         None
     """
-    with open("log.log", 'a') as file:
+    with open(_log, 'a') as file:
         file.write(sep.join(map(str, args)) + end)
 
 
