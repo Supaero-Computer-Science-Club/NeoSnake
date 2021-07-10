@@ -22,4 +22,5 @@ if [[ $(fc-list | grep -c square) == 0 ]];
   else  gsettings set org.gnome.desktop.interface monospace-font-name "$game_font";
         python "$dir_path"/src/main.py;
         gsettings set org.gnome.desktop.interface monospace-font-name "$terminal_font";
+        python "$dir_path"/src/score.py;
 fi

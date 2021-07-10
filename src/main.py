@@ -6,8 +6,6 @@ import sys
 # allows the user to play from anywhere in the system.
 from datetime import datetime
 
-import numpy as np
-
 _root = os.path.dirname(os.path.realpath(__file__)) + "/.."
 sys.path.append(_root)
 
@@ -19,8 +17,6 @@ from src.errors import curses_wrapper
 from src.errors import error_handler_wrapper
 
 import src.game as game
-
-from src.bot import ScoreBot
 
 
 @error_handler_wrapper
@@ -94,7 +90,7 @@ def main(stdscr):
             game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
         elif game_state == game.LOST:
             game_state = game.WAITING
-            data = [datetime.now().strftime("%d/%m/%Y %H:%M:%S"), game_score, user_name]
+            data = [game_score, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), user_name]
             game_scores.append(';'.join(map(str, data)))
 
         # blit all the objects on the screen.
@@ -103,16 +99,3 @@ def main(stdscr):
 
 if __name__ == "__main__":
     main()
-
-    with open(".token.txt", 'r') as token_file:
-        token = token_file.readline()
-
-    with open(".scores.csv", 'r') as file:
-        lines = file.readlines()
-    data = list(map(lambda s: s.strip().split(';'), lines))
-    dates, scores, users = zip(*data)
-    best = np.argmax(scores)
-
-    bot = ScoreBot("NeoSnake", flush=False)
-    bot.set_score(scores[best])
-    bot.run(token)
