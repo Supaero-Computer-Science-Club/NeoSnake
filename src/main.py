@@ -18,19 +18,9 @@ from src.errors import CustomError
 from src.errors import curses_wrapper
 from src.errors import error_handler_wrapper
 
-from src.game import _wall
-from src.game import PLAY
-from src.game import MENU
-from src.game import LOST
-from src.game import WAITING
-from src.game import init_borders
-from src.game import handle_input
-from src.game import menu
-from src.game import play
-from src.game import blit
-from src.game import get_user_name
+import src.game as game
 
-from src.score import ScoreBot
+from src.bot import ScoreBot
 
 
 @error_handler_wrapper
@@ -42,7 +32,7 @@ def main(stdscr):
     nb_apples = 2
     init_length = 2
     swiftness = 1
-    user_name = get_user_name(stdscr)
+    user_name = game.get_user_name(stdscr)
 
     # check if everything can work properly.
     if (curses.LINES < sh + 2) or (curses.COLS < sw + 2):
@@ -54,16 +44,16 @@ def main(stdscr):
         raise CustomError(msg)
 
     if curses.can_change_color():
-        curses.init_color(_wall, 1000, 1000, 1000)
-        curses.init_pair(_wall, _wall, _wall)
+        curses.init_color(game.WALL, 1000, 1000, 1000)
+        curses.init_pair(game.WALL, game.WALL, game.WALL)
     else:
-        curses.init_pair(_wall, curses.COLOR_WHITE, curses.COLOR_WHITE)
+        curses.init_pair(game.WALL, curses.COLOR_WHITE, curses.COLOR_WHITE)
 
     curses.curs_set(0)
     stdscr.nodelay(1)
 
     # all the objects in the scene.
-    top_border, bottom_border, left_border, right_border = init_borders(*scene)
+    top_border, bottom_border, left_border, right_border = game.init_borders(*scene)
     borders = top_border + bottom_border + left_border + right_border
     snake = Snake(swiftness=swiftness)
     apples = [Apple() for _ in range(nb_apples)]
@@ -74,7 +64,7 @@ def main(stdscr):
         apple.spawn(*scene)
 
     # internal variables of the game.
-    game_state = PLAY
+    game_state = game.PLAY
     game_debug = False
     game_debug_msg = ''
     game_score = 0
@@ -85,7 +75,7 @@ def main(stdscr):
         c = stdscr.getch()
 
         # handle the game input.
-        quit_game, reset, game_state, switch_debug = handle_input(c, game_state, scene, snake, apples)
+        quit_game, reset, game_state, switch_debug = game.handle_input(c, game_state, scene, snake, apples)
         if quit_game:
             with open(".scores.csv", "w") as file:
                 content = '\n'.join(map(str, game_scores))
@@ -95,20 +85,20 @@ def main(stdscr):
         game_score *= reset
 
         # run the current game state code snippet.
-        if game_state == MENU:
-            menu()
-        elif game_state == PLAY:
-            new_score, new_game_state, new_debug_msg = play(c, snake, apples, game_score)
+        if game_state == game.MENU:
+            game.menu()
+        elif game_state == game.PLAY:
+            new_score, new_game_state, new_debug_msg = game.play(c, snake, apples, game_score)
             game_score = new_score if new_score else game_score
             game_state = new_game_state if new_game_state else game_state
             game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
-        elif game_state == LOST:
-            game_state = WAITING
+        elif game_state == game.LOST:
+            game_state = game.WAITING
             data = [datetime.now().strftime("%d/%m/%Y %H:%M:%S"), game_score, user_name]
             game_scores.append(';'.join(map(str, data)))
 
         # blit all the objects on the screen.
-        blit(stdscr, borders, snake, apples, game_score, game_state, game_debug, user_name + game_debug_msg, fps)
+        game.blit(stdscr, borders, snake, apples, game_score, game_state, game_debug, user_name + game_debug_msg, fps)
 
 
 if __name__ == "__main__":

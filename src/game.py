@@ -5,7 +5,7 @@ import time
 from src.Snake import Snake
 from src.utils import prompt_user
 
-_wall = 10
+WALL = 10
 
 MENU = 1
 PLAY = 2
@@ -175,7 +175,7 @@ def blit(stdscr, borders, snake, apples, score, game_state, debug, debug_msg, fp
 
     # print the borders.
     for y, x in borders:
-        stdscr.insch(y, x, ' ', curses.color_pair(_wall))
+        stdscr.insch(y, x, ' ', curses.color_pair(WALL))
 
     # show the entities.
     snake.show(stdscr)
