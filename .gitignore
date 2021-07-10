@@ -247,3 +247,9 @@ TSWLatexianTemp*
 
 # weights and biases directory.
 wandb/
+
+# special files.
+TODO
+.user
+.token.txt
+*.csv
