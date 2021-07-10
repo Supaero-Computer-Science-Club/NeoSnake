@@ -4,7 +4,7 @@ import discord
 class ScoreBot(discord.Client):
     """ A Bot to send scores to the Discord server of SCSC."""
 
-    def __init__(self, game, payload, flush=False):
+    def __init__(self, game, payload, needs_flush=False):
         """
             Creates a bot that can that a score payload and send it to the Discord server of SCSC.
 
@@ -14,7 +14,7 @@ class ScoreBot(discord.Client):
                 the name of the game and thus the score board.
             payload : [(int, str, str), ...]
                 the payload to send to the server, namely [(score, date, username), ...].
-            flush : bool, optional
+            needs_flush : bool, optional
                 tells whether to flush the channel or not.
         """
         super(ScoreBot, self).__init__()
@@ -24,7 +24,7 @@ class ScoreBot(discord.Client):
 
         # the payload and the flush flag.
         self.payload = payload
-        self.flush = flush
+        self.needs_flush = needs_flush
 
         # the channel id the bot has access to.
         self.channel_id = 862644543207637042
@@ -51,6 +51,30 @@ class ScoreBot(discord.Client):
         # close the bot, its job is done.
         await self.close()
 
+    async def flush(self):
+        hist = await self.get_channel(self.channel_id).history(limit=None).flatten()
+
+        for i, msg in enumerate(hist):
+            print(f"{msg.content}")
+            if self.needs_flush:
+                await msg.delete()
+
+        if self.needs_flush:
+            hist = await self.get_channel(self.channel_id).history(limit=None).flatten()
+
+        return hist
+
+    def extract_previous_payload(self, score_board, sep):
+        previous_score_board = score_board.content.split('\n')
+        lines = list(map(lambda x: x.replace('`', '').split(sep)[1:], previous_score_board[3:]))
+        lines = list(map(lambda line: map(lambda el: el.replace('`', '').strip(), line), lines)) + self.payload
+
+        scores, dates, names = tuple(zip(*lines))
+        scores = list(map(int, scores))
+        payload = list(zip(scores, dates, names))
+
+        return payload
+
     async def build_score_board(self, payload, sep):
         # payload = list(zip(*payload))
         payload.sort()
@@ -67,36 +91,21 @@ class ScoreBot(discord.Client):
         return score_board
 
     async def send_score_board(self):
-        hist = await self.get_channel(self.channel_id).history(limit=None).flatten()
+        history = await self.flush()
 
-        for i, msg in enumerate(hist):
-            print(f"{msg.content}")
-            if self.flush:
-                await msg.delete()
-
-        if self.flush:
-            hist = await self.get_channel(self.channel_id).history(limit=None).flatten()
-
-        score_boards = [msg for msg in hist if msg.content.startswith(self.head)]
+        score_boards = [msg for msg in history if msg.content.startswith(self.head)]
 
         sep = ' | '
-        if len(hist) == 0 or len(score_boards) == 0:
+        if len(history) == 0 or len(score_boards) == 0:
             print(f"creating score board for {self.game}")
             payload = self.payload
 
         else:
-            score_board = score_boards[0]
+            payload = self.extract_previous_payload(score_boards[0], sep)
             for msg in score_boards:
                 await msg.delete()
 
             print("appending to", self.game)
-            previous_score_board = score_board.content.split('\n')
-            lines = list(map(lambda x: x.replace('`', '').split(sep)[1:], previous_score_board[3:]))
-            lines = list(map(lambda line: map(lambda el: el.replace('`', '').strip(), line), lines)) + self.payload
-
-            scores, dates, names = tuple(zip(*lines))
-            scores = list(map(int, scores))
-            payload = list(zip(scores, dates, names))
 
         score_board = await self.build_score_board(payload=payload, sep=sep)
         await self.get_channel(self.channel_id).send(score_board)
@@ -107,6 +116,6 @@ if __name__ == '__main__':
         token = token_file.readline()
     data = [(8, "10/07/2021 15:18:15", "toto"), (92, "10/07/2021 15:17:51", "antoine.stevan"),
             (1, "10/07/2021 15:17:54", "antoine")]
-    bot = ScoreBot(game="NeoSnake", payload=data, flush=True)
+    bot = ScoreBot(game="NeoSnake", payload=data, needs_flush=True)
     print("sending results...")
     bot.run(token)
