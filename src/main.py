@@ -4,6 +4,8 @@ import os
 import sys
 
 # allows the user to play from anywhere in the system.
+from datetime import datetime
+
 _root = os.path.dirname(os.path.realpath(__file__)) + "/.."
 sys.path.append(_root)
 
@@ -17,6 +19,8 @@ from src.errors import error_handler_wrapper
 from src.game import _wall
 from src.game import PLAY
 from src.game import MENU
+from src.game import LOST
+from src.game import WAITING
 from src.game import init_borders
 from src.game import handle_input
 from src.game import menu
@@ -70,6 +74,7 @@ def main(stdscr):
     game_debug = False
     game_debug_msg = ''
     game_score = 0
+    game_scores = []
 
     # the game loop.
     while True:
@@ -78,6 +83,9 @@ def main(stdscr):
         # handle the game input.
         quit_game, reset, game_state, switch_debug = handle_input(c, game_state, scene, snake, apples)
         if quit_game:
+            with open("scores.csv", "w") as file:
+                content = '\n'.join(map(str, game_scores))
+                file.write(content)
             break
         game_debug ^= switch_debug
         game_score *= reset
@@ -90,6 +98,10 @@ def main(stdscr):
             game_score = new_score if new_score else game_score
             game_state = new_game_state if new_game_state else game_state
             game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
+        elif game_state == LOST:
+            game_state = WAITING
+            data = [datetime.now().strftime("%d/%m/%Y %H:%M:%S"), game_score, user_name]
+            game_scores.append(';'.join(map(str, data)))
 
         # blit all the objects on the screen.
         blit(stdscr, borders, snake, apples, game_score, game_state, game_debug, user_name + game_debug_msg, fps)

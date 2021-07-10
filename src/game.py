@@ -10,6 +10,7 @@ _wall = 10
 MENU = 1
 PLAY = 2
 LOST = 3
+WAITING = 4
 
 
 def init_borders(y, x, h, w):
@@ -59,7 +60,8 @@ def handle_input(c, game_state, scene, snake, apples):
         Returns
         -------
         quit, reset, new_game_state, swicth_debug : bool, int, int, bool
-            a signal telling if the game is over, a reset integer for the score, the new state of the game and a debug switching signal.
+            a signal telling if the game is over, a reset integer for the score, the new state of the game and a debug
+            switching signal.
     """
     # quit the game.
     if c in [27, ord('q')]:
@@ -68,7 +70,7 @@ def handle_input(c, game_state, scene, snake, apples):
     # respawn the objects if 'r' is pressed whilst not playing
     reset, new_game_state, switch_debug = 0, game_state, False
     if c == ord('r'):
-        if game_state == LOST:
+        if game_state in [LOST, WAITING]:
             snake.spawn(*scene)
             for apple in apples:
                 apple.spawn(*scene)
