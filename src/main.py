@@ -6,6 +6,8 @@ import sys
 # allows the user to play from anywhere in the system.
 from datetime import datetime
 
+import numpy as np
+
 _root = os.path.dirname(os.path.realpath(__file__)) + "/.."
 sys.path.append(_root)
 
@@ -85,7 +87,7 @@ def main(stdscr):
         # handle the game input.
         quit_game, reset, game_state, switch_debug = handle_input(c, game_state, scene, snake, apples)
         if quit_game:
-            with open("scores.csv", "w") as file:
+            with open(".scores.csv", "w") as file:
                 content = '\n'.join(map(str, game_scores))
                 file.write(content)
             break
@@ -111,8 +113,16 @@ def main(stdscr):
 
 if __name__ == "__main__":
     main()
-    bot = ScoreBot("NeoSnake", flush=False)
+
     with open(".token.txt", 'r') as token_file:
         token = token_file.readline()
-        bot.set_score(42)
-        bot.run(token)
+
+    with open(".scores.csv", 'r') as file:
+        lines = file.readlines()
+    data = list(map(lambda s: s.strip().split(';'), lines))
+    dates, scores, users = zip(*data)
+    best = np.argmax(scores)
+
+    bot = ScoreBot("NeoSnake", flush=False)
+    bot.set_score(scores[best])
+    bot.run(token)
