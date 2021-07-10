@@ -28,6 +28,8 @@ from src.game import play
 from src.game import blit
 from src.game import get_user_name
 
+from src.score import ScoreBot
+
 
 @error_handler_wrapper
 @curses_wrapper
@@ -109,3 +111,8 @@ def main(stdscr):
 
 if __name__ == "__main__":
     main()
+    bot = ScoreBot("NeoSnake", flush=False)
+    with open(".token.txt", 'r') as token_file:
+        token = token_file.readline()
+        bot.set_score(42)
+        bot.run(token)
