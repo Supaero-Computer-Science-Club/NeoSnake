@@ -1,7 +1,9 @@
 import curses
+import os
 import time
 
 from src.Snake import Snake
+from src.utils import prompt_user
 
 _wall = 10
 
@@ -194,3 +196,45 @@ def blit(stdscr, borders, snake, apples, score, game_state, debug, debug_msg, fp
     # refresh and wait.
     stdscr.refresh()
     time.sleep(1 / fps)
+
+
+def get_user_name(stdscr):
+    """
+        Gets the username, either by reading the user file or by prompting the user.
+
+        Args
+        ----
+        stdscr : _curses.window
+            the screen object.
+
+        Returns
+        -------
+        user_name : str
+            the username to user during next game.
+    """
+    # some basic variables.
+    user_file = ".user"
+    user_name = ''
+    prompt = not os.path.exists(user_file)
+    msg = "Enter username: (hit Ctrl-G or enter to confirm)"
+
+    # the suer file exists.
+    if not prompt:
+        # read the file.
+        with open(user_file, 'r') as file:
+            user_name = file.readlines()
+            if len(user_name) != 1:  # if content has strange format, prompt the user.
+                prompt = True
+                msg = "user file has been corrupted... " + msg
+            else:
+                user_name = user_name[0].strip()
+
+    # the user needs to be prompted (unknown user or corrupted user file.)
+    if prompt:
+        while user_name == '':  # do not take empty strings into account.
+            user_name = prompt_user(stdscr, msg=msg).strip()
+        # save the username in the user file.
+        with open(user_file, 'w') as file:
+            file.write(user_name)
+
+    return user_name

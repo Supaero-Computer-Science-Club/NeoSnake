@@ -3,6 +3,9 @@ import os
 
 import numpy as np
 
+from curses.textpad import rectangle
+from curses.textpad import Textbox
+
 # directories initializations.
 _root = os.path.dirname(os.path.realpath(__file__)) + "/.."
 _log = os.path.join(_root, ".log")
@@ -70,6 +73,41 @@ def init_color_palette(r_bits=3, g_bits=3, b_bits=2):
         curses.init_color(color, reds[r], greens[g], blues[b])
         curses.init_pair(color, curses.COLOR_BLACK, color)
 
+
 # def paint(stdscr, y, x, _r, _g, _b, bits=3):
 #     color = (_r << (2 * bits)) + (_g << bits) + _b
 #     stdscr.addstr(y, x, ' ', curses.color_pair(8 + color))
+
+
+def prompt_user(stdscr, msg='', box=(1, 15, 1, 0)):
+    """
+        Prompts the user by creating an editable box and returning the resulting input string of characters.
+
+        Args
+        ----
+        stdscr : _curses.window
+            the screen object.
+        msg : str, optional
+            a message explaining the prompt.
+        box : (int, int, int, int), optional
+            the rectangle representing the geometry of the prompt box. Namely, (h, w, y, x) with y and x starting at 0.
+
+        Returns
+        -------
+        input : str
+            a string given by the user as an input.
+    """
+    # print the message above the box.
+    stdscr.addstr(box[2] - 1, 0, msg)
+
+    h, w, y, x = box
+    editwin = curses.newwin(h, w, y + 1, x + 1)  # curses.newwin starts positions at 1.
+    rectangle(stdscr, y, x, box[2] + box[0] + 1, box[3] + box[1] + 1)
+    stdscr.refresh()
+
+    # create the box and edit it.
+    box = Textbox(editwin)
+    box.edit()
+
+    # return the content of the box as the result.
+    return box.gather()

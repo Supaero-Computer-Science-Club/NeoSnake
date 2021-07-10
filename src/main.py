@@ -22,6 +22,7 @@ from src.game import handle_input
 from src.game import menu
 from src.game import play
 from src.game import blit
+from src.game import get_user_name
 
 
 @error_handler_wrapper
@@ -33,6 +34,7 @@ def main(stdscr):
     nb_apples = 2
     init_length = 2
     swiftness = 1
+    user_name = get_user_name(stdscr)
 
     # check if everything can work properly.
     if (curses.LINES < sh + 2) or (curses.COLS < sw + 2):
@@ -90,7 +92,7 @@ def main(stdscr):
             game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
 
         # blit all the objects on the screen.
-        blit(stdscr, borders, snake, apples, game_score, game_state, game_debug, game_debug_msg, fps)
+        blit(stdscr, borders, snake, apples, game_score, game_state, game_debug, user_name + game_debug_msg, fps)
 
 
 if __name__ == "__main__":
