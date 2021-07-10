@@ -90,7 +90,7 @@ def main(stdscr):
             game_debug_msg = new_debug_msg if new_debug_msg else game_debug_msg
         elif game_state == game.LOST:
             game_state = game.WAITING
-            data = [game_score, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), user_name]
+            data = (game_score, datetime.now().strftime("%d/%m/%Y %H:%M:%S"), user_name)
             game_scores.append(';'.join(map(str, data)))
 
         # blit all the objects on the screen.

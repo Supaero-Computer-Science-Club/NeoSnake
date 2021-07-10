@@ -14,7 +14,8 @@ def main():
     print("reading scores", end="... ")
     with open(".scores.csv", 'r') as file:
         lines = file.readlines()
-    data = list(map(lambda s: s.strip().split(';'), lines))  # score have following format: '<score>;<date>;<username>'.
+    # score have following format: '<score>;<date>;<username>'.
+    data = list(map(lambda s: tuple(s.strip().split(';')), lines))
 
     # do NOT continue if not a single game has been completed.
     if len(data) == 0:
