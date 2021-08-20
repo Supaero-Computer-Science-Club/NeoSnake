@@ -12,7 +12,7 @@ from src.bot import ScoreBot
 def main():
     # read the stashed scores.
     print("reading scores", end="... ")
-    with open(".scores.csv", 'r') as file:
+    with open(os.path.join(_root, ".scores.csv"), 'r') as file:
         lines = file.readlines()
     # score have following format: '<score>;<date>;<username>'.
     data = list(map(lambda s: tuple(s.strip().split(';')), lines))
@@ -24,7 +24,7 @@ def main():
 
     # read the token to connect the bot.
     print("reading token", end="... ")
-    with open(".token.txt", 'r') as token_file:
+    with open(os.path.join(_root, ".token.txt"), 'r') as token_file:
         token = token_file.readline()
 
     # run the bot.
